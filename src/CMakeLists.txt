@@ -1,7 +1,8 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0.0)
 
 PROJECT(WonderTrader)
-
+# set(CMAKE_C_COMPILER /home/yin/code/llvm/LLVM-19.1.0-Linux-X64/bin/clang)
+# set(CMAKE_CXX_COMPILER /home/yin/code/llvm/LLVM-19.1.0-Linux-X64/bin/clang++)
 #3. 环境判断
 IF (WIN32)
 	MESSAGE(STATUS "Operation System is windows")
@@ -52,6 +53,7 @@ ELSE (GNUCC)
 ENDIF()
 MESSAGE(STATUS "INCS:${INCS} LNS:${LNKS}")
 
+# 消除warning
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-nonnull -Wno-unused-result -Wno-format-overflow -Wno-write-strings")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_definitions(-DPTHREAD_STACK_MIN=16384)
