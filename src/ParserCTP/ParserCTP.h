@@ -19,10 +19,10 @@ NS_WTP_END
 
 USING_NS_WTP;
 
-class ParserBA : public IParserApi, public CThostFtdcMdSpi {
+class ParserCTP : public IParserApi, public CThostFtdcMdSpi {
 public:
-  ParserBA();
-  virtual ~ParserBA();
+  ParserCTP();
+  virtual ~ParserCTP();
 
 public:
   enum LoginStatus { LS_NOTLOGIN, LS_LOGINING, LS_LOGINED };

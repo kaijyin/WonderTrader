@@ -37,7 +37,7 @@ inline void write_log(IParserSpi *sink, WTSLogLevel ll, const char *format,
 
 extern "C" {
 EXPORT_FLAG IParserApi *createParser() {
-  ParserBA *parser = new ParserBA();
+  ParserCTP *parser = new ParserCTP();
   return parser;
 }
 
@@ -72,13 +72,13 @@ inline double checkValid(double val) {
   return val;
 }
 
-ParserBA::ParserBA()
+ParserCTP::ParserCTP()
     : m_pUserAPI(NULL), m_iRequestID(0), m_uTradingDate(0),
       m_bLocaltime(false) {}
 
-ParserBA::~ParserBA() { m_pUserAPI = NULL; }
+ParserCTP::~ParserCTP() { m_pUserAPI = NULL; }
 
-bool ParserBA::init(WTSVariant *config) {
+bool ParserCTP::init(WTSVariant *config) {
   m_strFrontAddr = config->getCString("front");
   m_strBroker = config->getCString("broker");
   m_strUserID = config->getCString("user");
@@ -127,9 +127,9 @@ bool ParserBA::init(WTSVariant *config) {
   return true;
 }
 
-void ParserBA::release() { disconnect(); }
+void ParserCTP::release() { disconnect(); }
 
-bool ParserBA::connect() {
+bool ParserCTP::connect() {
   if (m_pUserAPI) {
     m_pUserAPI->Init();
   }
@@ -137,7 +137,7 @@ bool ParserBA::connect() {
   return true;
 }
 
-bool ParserBA::disconnect() {
+bool ParserCTP::disconnect() {
   if (m_pUserAPI) {
     m_pUserAPI->RegisterSpi(NULL);
     m_pUserAPI->Release();
@@ -147,12 +147,12 @@ bool ParserBA::disconnect() {
   return true;
 }
 
-void ParserBA::OnRspError(CThostFtdcRspInfoField *pRspInfo, int nRequestID,
-                          bool bIsLast) {
+void ParserCTP::OnRspError(CThostFtdcRspInfoField *pRspInfo, int nRequestID,
+                           bool bIsLast) {
   IsErrorRspInfo(pRspInfo);
 }
 
-void ParserBA::OnFrontConnected() {
+void ParserCTP::OnFrontConnected() {
   if (m_sink) {
     write_log(m_sink, LL_INFO, "[ParserCTP] Market data server connected");
     m_sink->handleEvent(WPE_Connect, 0);
@@ -161,9 +161,9 @@ void ParserBA::OnFrontConnected() {
   ReqUserLogin();
 }
 
-void ParserBA::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin,
-                              CThostFtdcRspInfoField *pRspInfo, int nRequestID,
-                              bool bIsLast) {
+void ParserCTP::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin,
+                               CThostFtdcRspInfoField *pRspInfo, int nRequestID,
+                               bool bIsLast) {
   if (bIsLast && !IsErrorRspInfo(pRspInfo)) {
     m_uTradingDate = strtoul(m_pUserAPI->GetTradingDay(), NULL, 10);
     // By Wesley @ 2022.03.09
@@ -183,15 +183,15 @@ void ParserBA::OnRspUserLogin(CThostFtdcRspUserLoginField *pRspUserLogin,
   }
 }
 
-void ParserBA::OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout,
-                               CThostFtdcRspInfoField *pRspInfo, int nRequestID,
-                               bool bIsLast) {
+void ParserCTP::OnRspUserLogout(CThostFtdcUserLogoutField *pUserLogout,
+                                CThostFtdcRspInfoField *pRspInfo,
+                                int nRequestID, bool bIsLast) {
   if (m_sink) {
     m_sink->handleEvent(WPE_Logout, 0);
   }
 }
 
-void ParserBA::OnFrontDisconnected(int nReason) {
+void ParserCTP::OnFrontDisconnected(int nReason) {
   if (m_sink) {
     write_log(m_sink, LL_ERROR,
               "[ParserCTP] Market data server disconnected: {}", nReason);
@@ -199,11 +199,11 @@ void ParserBA::OnFrontDisconnected(int nReason) {
   }
 }
 
-void ParserBA::OnRspUnSubMarketData(
+void ParserCTP::OnRspUnSubMarketData(
     CThostFtdcSpecificInstrumentField *pSpecificInstrument,
     CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {}
 
-void ParserBA::OnRtnDepthMarketData(
+void ParserCTP::OnRtnDepthMarketData(
     CThostFtdcDepthMarketDataField *pDepthMarketData) {
   if (m_pBaseDataMgr == NULL) {
     return;
@@ -319,7 +319,7 @@ void ParserBA::OnRtnDepthMarketData(
   tick->release();
 }
 
-void ParserBA::OnRspSubMarketData(
+void ParserCTP::OnRspSubMarketData(
     CThostFtdcSpecificInstrumentField *pSpecificInstrument,
     CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast) {
   if (!IsErrorRspInfo(pRspInfo)) {
@@ -328,13 +328,13 @@ void ParserBA::OnRspSubMarketData(
   }
 }
 
-void ParserBA::OnHeartBeatWarning(int nTimeLapse) {
+void ParserCTP::OnHeartBeatWarning(int nTimeLapse) {
   if (m_sink)
     write_log(m_sink, LL_INFO, "[ParserCTP] Heartbeating, elapse: {}",
               nTimeLapse);
 }
 
-void ParserBA::ReqUserLogin() {
+void ParserCTP::ReqUserLogin() {
   if (m_pUserAPI == NULL) {
     return;
   }
@@ -353,7 +353,7 @@ void ParserBA::ReqUserLogin() {
   }
 }
 
-void ParserBA::DoSubscribeMD() {
+void ParserCTP::DoSubscribeMD() {
   CodeSet codeFilter = m_filterSubs;
   if (codeFilter.empty()) { // 如果订阅礼包只空的,则取出全部合约列表
     return;
@@ -387,11 +387,11 @@ void ParserBA::DoSubscribeMD() {
   delete[] subscribe;
 }
 
-bool ParserBA::IsErrorRspInfo(CThostFtdcRspInfoField *pRspInfo) {
+bool ParserCTP::IsErrorRspInfo(CThostFtdcRspInfoField *pRspInfo) {
   return false;
 }
 
-void ParserBA::subscribe(const CodeSet &vecSymbols) {
+void ParserCTP::subscribe(const CodeSet &vecSymbols) {
   if (m_uTradingDate == 0) {
     m_filterSubs = vecSymbols;
   } else {
@@ -400,11 +400,11 @@ void ParserBA::subscribe(const CodeSet &vecSymbols) {
   }
 }
 
-void ParserBA::unsubscribe(const CodeSet &vecSymbols) {}
+void ParserCTP::unsubscribe(const CodeSet &vecSymbols) {}
 
-bool ParserBA::isConnected() { return m_pUserAPI != NULL; }
+bool ParserCTP::isConnected() { return m_pUserAPI != NULL; }
 
-void ParserBA::registerSpi(IParserSpi *listener) {
+void ParserCTP::registerSpi(IParserSpi *listener) {
   m_sink = listener;
 
   if (m_sink)
