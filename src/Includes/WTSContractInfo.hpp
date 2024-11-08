@@ -166,10 +166,10 @@ private:
 
   WTSSessionInfo *m_pSession;
 
-  double m_dOpenFee;   // 开仓手续费
-  double m_dCloseFee;  // 平仓手续费
-  double m_dCloseTFee; // 平今手续费
-  int m_nFeeAlg; // 手续费算法，默认为-1，不计算,0是按成交量，1为按成交额
+  double m_dOpenFee;    // 开仓手续费
+  double m_dCloseFee;   // 平仓手续费
+  double m_dCloseTFee;  // 平今手续费
+  int m_nFeeAlg;        // 手续费算法，默认为-1，不计算,0是按成交量，1为按成交额
   double m_dMarginRate; // 保证金率
 };
 
@@ -349,7 +349,7 @@ private:
   double m_dOpenFee;   // 开仓手续费
   double m_dCloseFee;  // 平仓手续费
   double m_dCloseTFee; // 平今手续费
-  int m_nFeeAlg; // 手续费算法，默认为-1，不计算,0是按成交量，1为按成交额
+  int m_nFeeAlg;       // 手续费算法，默认为-1，不计算,0是按成交量，1为按成交额
 
   WTSCommodityInfo *m_commInfo;
   uint32_t m_uHotFlag;

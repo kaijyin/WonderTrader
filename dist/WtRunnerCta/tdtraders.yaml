@@ -15,9 +15,9 @@ traders:
     # 以上是TraderAdapter读取的配置
     # 以下是TraderXXX读取的配置
     front: tcp://180.168.146.187:10201
-    broker: '9999'                      
+    broker: '9999'
     appid: simnow_client_test
-    authcode: '0000000000000000'    
+    authcode: '0000000000000000'
     user: "yoursimnowaccount"
     pass: "yoursimnowpassword"
     quick: true                       # 是否订阅快速私有流，如果为true，则不会接受上次之前的私有流，这个一定要为true！！！
